@@ -1,0 +1,5 @@
+/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign01_GraphVizz_win20/build/CMakeFiles/graph.dir
+/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign01_GraphVizz_win20/build/CMakeFiles/edit_cache.dir
+/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign01_GraphVizz_win20/build/CMakeFiles/rebuild_cache.dir
+/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign01_GraphVizz_win20/build/CMakeFiles/graph_autogen_timestamp_deps.dir
+/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign01_GraphVizz_win20/build/CMakeFiles/graph_autogen.dir
