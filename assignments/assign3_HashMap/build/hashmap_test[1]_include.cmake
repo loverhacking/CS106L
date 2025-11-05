@@ -1,0 +1,5 @@
+if(EXISTS "/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign3_HashMap/build/hashmap_test[1]_tests.cmake")
+  include("/Users/yzj/Documents/coding/csdiy/CS106L/assignments/assign3_HashMap/build/hashmap_test[1]_tests.cmake")
+else()
+  add_test(hashmap_test_NOT_BUILT hashmap_test_NOT_BUILT)
+endif()

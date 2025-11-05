@@ -1,0 +1,164 @@
+1.Templates and Template Classes
+In the rehash() function, the for-each loop contains an auto&. What is the deduced type of
+that auto, and why the ampersand necessary?
+ANS: The deduced type of auto is node*. This is because _buckets_array is a std::vector<Node*> type (declared in hashmap.h), where each element is a pointer to a Node object. 
+
+The ampersand is necessary because:
+the code needs to modify the pointers stored in _buckets_array. 
+Without the reference, the loop would create copies of the pointers, and any modifications would only affect these copies, 
+not the actual elements in the vector. Using auto& allows direct access to the pointers in _buckets_array, 
+enabling proper modification during the rehashing process.
+
+
+2. HashMap Pair Type
+STL containers store elements of type value_type, and for your HashMap this value_type is 
+a std::pair<const K, M>. What would be the problem in the HashMap class if value_type
+were instead std::pair<K, M>?
+ANS: std::pair<const K, M>. If value_type were instead std::pair<K, M>, several critical problems would occur:
+
+    1. Violation of hash table integrity: Allowing key modification could change an element's hash value while it remains in its original bucket, 
+        invalidating lookup, insertion, and deletion operations.
+
+    2. Iterator safety issues: Users could directly modify keys through regular iterators, 
+        violating the hash table's design principles.
+
+    3. Inconsistency with STL design: Standard library containers like std::unordered_map also use const keys to ensure container correctness.
+
+    4. Potential undefined behavior: After modifying a key, the container's invariants are broken, potentially leading to memory leaks or invalid access.
+
+
+3. Find vs. 𝓕𝓲𝓷𝓭
+In addition to the HashMap::find member function, there is also a std::find function in the
+STL algorithms library. If you were searching for key k in HashMap m, is it preferable to call
+m.find(k) or std::find(m.begin(), m.end(), k)?
+ANS: m.find(k) is preferable to std::find(m.begin(), m.end(), k) when searching for a key in a HashMap. The key points covered are:
+    1. Time complexity difference : m.find(k) operates in O(1) average time by using the hash function to directly locate the appropriate bucket, 
+        while std::find performs a linear O(N) search through all elements.
+    2. Structure exploitation : The HashMap::find method leverages the hash table's structure for efficient lookups, 
+        while std::find treats the container as a simple linear sequence.
+    3. Scalability : As the number of elements grows, the performance gap between the two approaches becomes more significant, 
+        with m.find(k) maintaining near-constant time complexity while std::find's performance degrades linearly.
+
+
+4. RAII?
+This HashMap class is RAII-compliant. Explain why.
+ANS: The HashMap class follows the RAII (Resource Acquisition Is Initialization) principle for the following reasons:
+    1. Resource acquisition in constructors: The constructor initializes all resources when an object is created, including the _buckets_array vector and setting up the initial bucket count. Dynamic memory allocation for nodes happens through new in the insert method, with proper initialization.
+    2. Resource release in destructor: The destructor ensures all allocated resources are properly released by calling the clear() method, which is intended to deallocate all node memory when the HashMap object goes out of scope.
+    3. Container-managed memory: The underlying bucket storage uses std::vector<node*>, which manages its own memory automatically. The vector's destructor will be called when the HashMap is destroyed.
+    4. Scope-based resource management: Resources are tied to the lifetime of the HashMap object - they are acquired when the object is created and released when the object is destroyed.
+
+
+5. privacy
+Why is the HashMapIterator's constructor private? How do HashMapIterators get
+constructed if the constructor is private?
+ANS: The HashMapIterator's constructor is private for the following reasons:
+    1. Encapsulation and control: Making the constructor private ensures that client code cannot create invalid or inconsistent iterators directly. This maintains control over how iterators are created and used.
+    2. Iterator validity: It prevents users from constructing iterators that point to invalid or non-existent nodes in the hash map structure.
+    3. Proper initialization: Ensures all iterator instances are properly initialized with the correct bucket array pointer, node pointer, and bucket index.
+    
+HashMapIterators are constructed through the following mechanisms:
+    1. Friend class access: The HashMap class is declared as a friend of HashMapIterator (via the friend Map; declaration). This allows HashMap to access the private constructor directly.
+    2. Factory method: The HashMap class provides a private make_iterator(node* curr) method that constructs and returns iterator instances. This method is responsible for properly initializing the iterator with the correct parameters.
+    3. Iterator creation points: Iterators are created through public HashMap methods like begin(), end(), find(), insert(), and erase(), which internally call the make_iterator method.
+    4. Iterator conversion: The HashMapIterator also provides public conversion operators (like from non-const to const iterator) that use the private constructor.
+
+
+
+6. Increments
+Briefly explain the implementation of HashMapIterator's operator++, which we provide for
+you. How does it work and what checks does it have?
+ANS: The HashMapIterator implements two versions of operator++ with the following characteristics:
+
+Prefix operator++ (++iter):
+    1. First, it moves to the next node in the current bucket's linked list with `_node = _node->next`.
+    2. If the next node is nullptr (meaning we've reached the end of the current bucket's linked list):
+        - It increments the bucket index to move to the next bucket
+        - It searches through subsequent buckets until it finds a non-empty one or reaches the end of all buckets
+        - When a non-empty bucket is found, it sets the iterator to point to the first node of that bucket
+    3. Returns a reference to the updated iterator
+    4. Key checks/assumptions:
+        - The implementation assumes that _node is never nullptr when the operator is called (i.e., it's not called on end())
+        - It performs bounds checking with `_bucket < _buckets_array->size()` to prevent accessing beyond the array
+
+Postfix operator++ (iter++):
+    1. Creates a copy of the current iterator state
+    2. Calls the prefix operator++ on the original iterator to advance it
+    3. Returns the previously created copy (preserving the iterator's original state)
+    4. This follows the standard C++ iterator semantics for postfix increment
+
+Important considerations:
+    - The implementation assumes the iterator is valid when operator++ is called
+    - There's an implied contract that clients shouldn't call operator++ on end() iterators
+    - The design efficiently handles traversal across multiple buckets, which is necessary for a hash map implementation
+
+
+7. Did We Make a Mistake? (Hint: no)
+Why is there both a const and non-const version of at(), but only a non-const version of
+operator[]? (unlike in Vector where operator[] also had a const version).
+Hint: operator[] has some extra functionality compared to the at function.
+ANS: Because operator[] has an important side effect: it inserts a new key-value pair with a default-constructed value when the key doesn't exist. 
+This modification of the hash map's state is not allowed on const objects, which is why there cannot be a const version of operator[]. 
+In contrast, the at() method simply throws an exception when the key doesn't exist without modifying the map's state, 
+making it safe to call on const objects and allowing for both const and non-const versions.
+
+
+8. Now Streaming on iTunes
+Look at the function signature for the stream insertion (operator<<) in hashmap.cpp. Briefly
+explain the syntax for this function signature and how this works.
+Hint: your answer should reference (no pun intended): the parameters and return value, their
+constness, and the fact that they are references; and the reason why this operator is not a
+member function, and not a friend of HashMap (it's not even declared in the .h file!)
+ANS: The function signature `template <typename K, typename M, typename H> std::ostream& operator<<(std::ostream& os, const HashMap<K, M, H>& rhs)` has several important features:
+
+    1. It's a function template with the same three type parameters (K, M, H) as HashMap, allowing it to work with any instantiation of the HashMap class.
+
+    2. The return type is `std::ostream&`, returning a reference to the output stream. This enables chaining of insertion operations (e.g., `cout << map1 << map2`), as each call returns the original stream.
+
+    3. Parameters:
+        - `std::ostream& os`: A reference to the output stream (like cout). Using a reference avoids unnecessary copying of the stream object.
+        - `const HashMap<K, M, H>& rhs`: A const reference to the HashMap being printed. The const qualifier ensures the function doesn't modify the HashMap.
+
+    4. The operator is not a member function because in C++, the left operand of a binary operator is the `this` object in a member function. Since we want the left operand to be the stream (e.g., cout), it must be a standalone function.
+
+    5. It's not a friend function and not declared in the .h file because it doesn't need direct access to private members of HashMap. It can use the public interface, particularly range-based for loops which likely leverage the public iterators of HashMap.
+
+The implementation works by constructing a formatted string representation of the HashMap using an ostringstream, then outputting this string to the provided output stream.
+
+
+9. Attachment Issues
+Why is it that we need to implement the special member functions in the HashMap class,
+but we can default all the special member functions in the HashMapIterator class?
+Hint: your answer should reference the Rule of Five (the Rule of 3 including move operations) vs.
+the Rule of Zero, and also talk about std::vector's copy constructor/assignment operator
+ANS: The difference in special member function implementation follows the Rule of Five vs. Rule of Zero principles:
+
+1. HashMap class (Rule of Five applies):
+   - HashMap manages dynamically allocated memory through its `_buckets_array` which contains pointers to Node objects
+   - These nodes are dynamically allocated/deallocated throughout the HashMap's lifecycle
+   - Without custom implementation, the default copy/move operations would simply copy/move the pointers (shallow copy), leading to double-free errors or dangling pointers when one object is destroyed
+   - The destructor needs to properly deallocate all node memory to prevent memory leaks
+
+2. HashMapIterator class (Rule of Zero applies):
+   - HashMapIterator only holds pointers to objects managed by the HashMap (`_buckets_array` and `_node`)
+   - It does not own or manage the memory it points to
+   - When an iterator is copied/moved/destroyed, it doesn't affect the underlying data structure
+   - The iterator is just a view into the HashMap's data
+
+This is similar to how std::vector's iterators don't need custom special member functions because they are views into the vector's data, while std::vector itself needs custom implementations to manage its dynamically allocated internal array.
+
+10. Move Semantics
+In your move constructor or move assignment operator, why did you have to std::move each
+member, even though the parameter (named rhs) is already an r-value reference?
+Hint: the lecture on move semantics goes into this in some detail.
+ANS: Even though the parameter `rhs` is an r-value reference, we still need to use `std::move` for each member because:
+
+    1. Inside the function, `rhs` is actually an l-value! The parameter name `rhs` is an identifier, and all identifiers in expressions are treated as l-values, regardless of whether they reference an r-value or l-value.
+
+    2. Without `std::move`, when assigning members from `rhs` to `this`, we would be performing copies rather than moves. This is because the compiler would see `rhs._size` as an l-value and call the copy constructor/assignment operator instead of the move constructor/assignment operator.
+
+    3. By applying `std::move` to each member, we explicitly convert them back to r-values, which triggers the move semantics for each member variable.
+
+    4. This is a key principle in move semantics: r-value references are just references; it's `std::move` that actually makes values movable by converting them to r-values.
+
+For example, in `_size = std::move(map._size)`, the `std::move` ensures that `map._size` is treated as an r-value, allowing the move assignment operator for `_size` to be called, which typically performs a more efficient transfer of resources than a copy operation.
