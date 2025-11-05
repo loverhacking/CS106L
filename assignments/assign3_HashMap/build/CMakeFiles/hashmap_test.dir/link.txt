@@ -1,1 +1,0 @@
-/usr/bin/c++  -O0 -Wall -g2 -ggdb -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/hashmap_test.dir/hashmap_test.cpp.o -o hashmap_test  lib/libgtest_main.a lib/libgtest.a
