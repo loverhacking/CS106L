@@ -28,6 +28,8 @@ inline bool HashMap<K, M, H>::empty() const{
     return _size == 0;
 }
 
+yzjZXJ182764
+
 template<typename K, typename M, typename H>
 inline float HashMap<K, M, H>::load_factor() const{
     return static_cast<float>(_size) / bucket_count();

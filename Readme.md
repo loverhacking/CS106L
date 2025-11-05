@@ -25,5 +25,5 @@ The course slides are from cs106L win2020.
 * PA4: KDTree
 * PA5: GapBuffer
 
-The first two assignments are from win2020 cs106L, and the rest can be referred to the git reposit.ory: https://github.com/wengwz/CS106L-Self-Learning
+The first two assignments are from win2020 cs106L, and the rest can be referred to the git repository: https://github.com/wengwz/CS106L-Self-Learning
 
