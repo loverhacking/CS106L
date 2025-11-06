@@ -13,14 +13,14 @@
 #include "gtest/gtest.h"
 
 #define TEST1_ENABLED 1
-#define TEST2_ENABLED 0
-#define TEST3_ENABLED 0
-#define TEST4_ENABLED 0
-#define TEST5_ENABLED 0
-#define TEST6_ENABLED 0
-#define TEST7_ENABLED 0
-#define TEST8_ENABLED 0
-#define TEST9_ENABLED 0
+#define TEST2_ENABLED 1
+#define TEST3_ENABLED 1
+#define TEST4_ENABLED 1
+#define TEST5_ENABLED 1
+#define TEST6_ENABLED 1
+#define TEST7_ENABLED 1
+#define TEST8_ENABLED 1
+#define TEST9_ENABLED 1
 
 #if TEST1_ENABLED
 /*
@@ -650,6 +650,8 @@ TEST(GapBufferTest, TEST5E_ITERATOR_RANDOM_ACCESS) {
 //  * YES!!! - your iterators abstract away the containers, and the algorithms
 //  * work purely on the iterators.
 //  */
+
+
 TEST(GapBufferTest, TEST5F_ITERATOR_ADVANCED_SORT) {
     std::vector<int> vec{5, 2, 6, 3, 9, 0, 1, 8, 4, 7};
     GapBuffer<int> buf;
@@ -669,6 +671,7 @@ TEST(GapBufferTest, TEST5F_ITERATOR_ADVANCED_SORT) {
     ASSERT_EQ(current_index, vec.size());
 }
 #endif
+
 
 #if TEST6_ENABLED
 // /*
